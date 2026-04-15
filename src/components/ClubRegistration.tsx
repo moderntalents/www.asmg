@@ -63,22 +63,19 @@ export default function ClubRegistration() {
     }
 
     try {
-      await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-registration-email`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            club_name: form.club_name.trim(),
-            primary_sport: form.primary_sport,
-            phone_number: form.phone_number.trim(),
-            mpesa_code: form.mpesa_code.trim(),
-          }),
-        }
-      );
+      const formspreeData = new FormData();
+      formspreeData.append('Coach / Club Name', form.club_name.trim());
+      formspreeData.append('Primary Sport', form.primary_sport);
+      formspreeData.append('Phone Number', form.phone_number.trim());
+      formspreeData.append('M-Pesa Transaction Code', form.mpesa_code.trim().toUpperCase());
+      formspreeData.append('Liability Waiver Accepted', 'Yes');
+      formspreeData.append('_subject', `New Club Registration: ${form.club_name.trim()} - ${form.primary_sport}`);
+
+      await fetch('https://formspree.io/f/xpwrqgkd', {
+        method: 'POST',
+        body: formspreeData,
+        headers: { Accept: 'application/json' },
+      });
     } catch (_) {
     }
 

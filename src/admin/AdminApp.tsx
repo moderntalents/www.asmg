@@ -1,41 +1,25 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { useState } from 'react';
 import AdminLogin from './AdminLogin';
 import AdminGallery from './AdminGallery';
 import { LogOut, Images } from 'lucide-react';
-import type { User } from '@supabase/supabase-js';
 
 export default function AdminApp() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [unlocked, setUnlocked] = useState(
+    () => sessionStorage.getItem('asmg_admin') === 'true'
+  );
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
-      setLoading(false);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => { listener.subscription.unsubscribe(); };
-  }, []);
-
-  async function handleSignOut() {
-    await supabase.auth.signOut();
+  function handleLogin() {
+    sessionStorage.setItem('asmg_admin', 'true');
+    setUnlocked(true);
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+  function handleSignOut() {
+    sessionStorage.removeItem('asmg_admin');
+    setUnlocked(false);
   }
 
-  if (!user) {
-    return <AdminLogin onLogin={setUser} />;
+  if (!unlocked) {
+    return <AdminLogin onLogin={handleLogin} />;
   }
 
   return (
@@ -51,16 +35,13 @@ export default function AdminApp() {
               <span className="hidden sm:inline text-xs text-gray-400 ml-2">Gallery Manager</span>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:block text-sm text-gray-500">{user.email}</span>
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-600 transition-colors font-medium"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign out
-            </button>
-          </div>
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-600 transition-colors font-medium"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign out
+          </button>
         </div>
       </header>
 

@@ -42,7 +42,6 @@ function App() {
       <Navigation />
       <Hero />
       <About />
-      <LearnMore />
       <SportsCategories />
       <RegistrationForm />
       <Events />
@@ -50,6 +49,7 @@ function App() {
       <LiveGate />
       <Contact />
       <AffiliatedMembers />
+      <LearnMore />
       <Footer />
     </div>
   );

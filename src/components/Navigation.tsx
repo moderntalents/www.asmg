@@ -5,13 +5,12 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { name: 'Home', href: '#home', live: false },
-    { name: 'About', href: '#about', live: false },
-    { name: 'Sports', href: '#sports', live: false },
-    { name: 'Events', href: '#events', live: false },
-    { name: 'Gallery', href: '#gallery', live: false },
-    { name: 'Live', href: '#live', live: true },
-    { name: 'Contact', href: '#contact', live: false },
+    { name: 'Home', href: '#home' },
+    { name: 'About', href: '#about' },
+    { name: 'Sports', href: '#sports' },
+    { name: 'Events', href: '#events' },
+    { name: 'Gallery', href: '#gallery' },
+    { name: 'Contact', href: '#contact' },
   ];
 
   return (
@@ -31,18 +30,18 @@ export default function Navigation() {
               <a
                 key={link.name}
                 href={link.href}
-                className={`inline-flex items-center gap-1.5 font-medium transition-colors ${
-                  link.live
-                    ? 'text-red-600 hover:text-red-700 font-bold'
-                    : 'text-gray-700 hover:text-green-600'
-                }`}
+                className="font-medium text-gray-700 hover:text-green-600 transition-colors"
               >
-                {link.live && (
-                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block" />
-                )}
                 {link.name}
               </a>
             ))}
+            <a
+              href="#live"
+              className="inline-flex items-center gap-1.5 font-bold text-red-600 hover:text-red-700 transition-colors"
+            >
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block" />
+              Live
+            </a>
             <a
               href="#register"
               className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-2 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105 inline-block"
@@ -71,19 +70,20 @@ export default function Navigation() {
               <a
                 key={link.name}
                 href={link.href}
-                className={`flex items-center gap-2 py-2 font-medium ${
-                  link.live
-                    ? 'text-red-600 hover:text-red-700 font-bold'
-                    : 'text-gray-700 hover:text-green-600'
-                }`}
+                className="flex items-center gap-2 py-2 font-medium text-gray-700 hover:text-green-600"
                 onClick={() => setIsOpen(false)}
               >
-                {link.live && (
-                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block" />
-                )}
                 {link.name}
               </a>
             ))}
+            <a
+              href="#live"
+              className="flex items-center gap-2 py-2 font-bold text-red-600 hover:text-red-700"
+              onClick={() => setIsOpen(false)}
+            >
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block" />
+              Live
+            </a>
             <a
               href="#register"
               className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg font-semibold block text-center"

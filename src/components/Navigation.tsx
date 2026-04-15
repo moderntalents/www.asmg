@@ -8,7 +8,7 @@ export default function Navigation() {
     { name: 'Home', href: '#home', live: false },
     { name: 'About', href: '#about', live: false },
     { name: 'Sports', href: '#sports', live: false },
-    { name: 'Register', href: '#register', live: false },
+    { name: 'Events', href: '#events', live: false },
     { name: 'Gallery', href: '#gallery', live: false },
     { name: 'Live', href: '#live', live: true },
     { name: 'Contact', href: '#contact', live: false },

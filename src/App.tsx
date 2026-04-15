@@ -5,7 +5,6 @@ import About from './components/About';
 import AffiliatedMembers from './components/AffiliatedMembers';
 import LearnMore from './components/LearnMore';
 import SportsCategories from './components/SportsCategories';
-import RegistrationForm from './components/RegistrationForm';
 import Events from './components/Events';
 import Gallery from './components/Gallery';
 import LiveGate from './components/LiveGate';
@@ -43,7 +42,6 @@ function App() {
       <Hero />
       <About />
       <SportsCategories />
-      <RegistrationForm />
       <Events />
       <Gallery />
       <LiveGate />

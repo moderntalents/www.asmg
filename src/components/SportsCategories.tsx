@@ -112,9 +112,11 @@ export default function SportsCategories() {
                   <div className="p-5 flex flex-col flex-1">
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <h3 className="text-base font-bold text-gray-900 leading-tight">{sport.name}</h3>
-                      <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0 ${style.badge}`}>
-                        Sh 1,000
-                      </span>
+                      {sport.july_event && (
+                        <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0 ${style.badge}`}>
+                          Sh 1,000
+                        </span>
+                      )}
                     </div>
 
                     <p className="text-gray-500 text-sm leading-relaxed flex-1 mb-3">
@@ -128,10 +130,12 @@ export default function SportsCategories() {
                       </div>
                     )}
 
-                    <div className="border-t border-gray-100 pt-3 flex items-center justify-between text-xs text-gray-500 mb-3">
-                      <span>Registration Fee</span>
-                      <span className="font-bold text-gray-800 text-sm">Sh 1,000</span>
-                    </div>
+                    {sport.july_event && (
+                      <div className="border-t border-gray-100 pt-3 flex items-center justify-between text-xs text-gray-500 mb-3">
+                        <span>Registration Fee</span>
+                        <span className="font-bold text-gray-800 text-sm">Sh 1,000</span>
+                      </div>
+                    )}
 
                     <a
                       href="#register"

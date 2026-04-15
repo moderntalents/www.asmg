@@ -11,11 +11,16 @@ interface GalleryImage {
 
 const IMAGES: GalleryImage[] = [
   {
-    url: 'https://images.pexels.com/photos/262524/pexels-photo-262524.jpeg?auto=compress&cs=tinysrgb&w=800',
-    title: 'Karate Sparring',
-    category: 'Karate',
-    club: 'Nairobi Elite Club',
-    tags: ['karate', 'martial arts', 'sparring', 'nairobi elite club'],
+    url: '/IMG-20240707-WA0026.jpg',
+    title: 'Skating Slalom Race',
+    category: 'Skating',
+    tags: ['skating', 'inline skating', 'slalom', 'roller sports'],
+  },
+  {
+    url: '/IMG-20240707-WA0031.jpg',
+    title: 'Skating Competition',
+    category: 'Skating',
+    tags: ['skating', 'inline skating', 'competition', 'roller sports'],
   },
   {
     url: 'https://images.pexels.com/photos/1812960/pexels-photo-1812960.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -98,7 +103,7 @@ const IMAGES: GalleryImage[] = [
 
 const CATEGORIES = [
   'All',
-  'Karate',
+  'Skating',
   'Martial Arts',
   'Classical Ballet',
   'Modern Dance',

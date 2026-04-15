@@ -12,10 +12,10 @@ interface GalleryImage {
 const IMAGES: GalleryImage[] = [
   {
     url: 'https://images.pexels.com/photos/262524/pexels-photo-262524.jpeg?auto=compress&cs=tinysrgb&w=800',
-    title: 'Taekwondo Sparring',
-    category: 'Martial Arts',
+    title: 'Karate Sparring',
+    category: 'Karate',
     club: 'Nairobi Elite Club',
-    tags: ['martial arts', 'taekwondo', 'karate', 'sparring', 'nairobi elite club'],
+    tags: ['karate', 'martial arts', 'sparring', 'nairobi elite club'],
   },
   {
     url: 'https://images.pexels.com/photos/1812960/pexels-photo-1812960.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -98,6 +98,7 @@ const IMAGES: GalleryImage[] = [
 
 const CATEGORIES = [
   'All',
+  'Karate',
   'Martial Arts',
   'Classical Ballet',
   'Modern Dance',

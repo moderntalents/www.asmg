@@ -130,7 +130,7 @@ export default function Footer() {
             </div>
           </div>
           <p className="text-center text-gray-500 text-xs mt-4">
-            Organized by KKF & Tawi Global
+            Organized by KKF, Kumbo, Tawi Global, ILSKF
           </p>
         </div>
       </div>

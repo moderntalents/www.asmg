@@ -11,8 +11,10 @@ import LiveGate from './components/LiveGate';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import MemberStream from './components/MemberStream';
+import AdminApp from './admin/AdminApp';
 
 const MEMBER_PATH = '/asmg-member-stream-2026';
+const ADMIN_PATH = '/asmg-admin';
 
 function usePath() {
   const [path, setPath] = useState(window.location.pathname);
@@ -34,6 +36,10 @@ function App() {
 
   if (path === MEMBER_PATH) {
     return <MemberStream />;
+  }
+
+  if (path === ADMIN_PATH) {
+    return <AdminApp />;
   }
 
   return (

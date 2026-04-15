@@ -1,229 +1,242 @@
-import { useState, useMemo } from 'react';
-import { Search, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { Images, ArrowLeft, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface GalleryImage {
-  url: string;
-  title: string;
-  category: string;
-  club?: string;
-  tags: string[];
+interface GalleryEvent {
+  id: string;
+  name: string;
+  created_at: string;
+  cover_url?: string;
+  photo_count: number;
 }
 
-const IMAGES: GalleryImage[] = [
-  {
-    url: '/IMG-20240707-WA0026.jpg',
-    title: 'Skating Slalom Race',
-    category: 'Skating',
-    tags: ['skating', 'inline skating', 'slalom', 'roller sports'],
-  },
-  {
-    url: '/IMG-20240707-WA0031.jpg',
-    title: 'Skating Competition',
-    category: 'Skating',
-    tags: ['skating', 'inline skating', 'competition', 'roller sports'],
-  },
-  {
-    url: 'https://images.pexels.com/photos/1812960/pexels-photo-1812960.jpeg?auto=compress&cs=tinysrgb&w=800',
-    title: 'Classical Ballet Performance',
-    category: 'Classical Ballet',
-    club: 'Kenyatta Arts Academy',
-    tags: ['classical ballet', 'ballet', 'dance', 'performance', 'kenyatta arts academy'],
-  },
-  {
-    url: 'https://images.pexels.com/photos/358010/pexels-photo-358010.jpeg?auto=compress&cs=tinysrgb&w=800',
-    title: 'Contemporary Dance Showcase',
-    category: 'Modern Dance',
-    club: 'Afro Motion Crew',
-    tags: ['modern dance', 'contemporary', 'dance', 'afro motion crew'],
-  },
-  {
-    url: 'https://images.pexels.com/photos/277253/pexels-photo-277253.jpeg?auto=compress&cs=tinysrgb&w=800',
-    title: 'Athletics Sprint Final',
-    category: 'Athletics',
-    club: 'Kenya Track Stars',
-    tags: ['athletics', 'sprint', 'track', 'field', 'kenya track stars'],
-  },
-  {
-    url: 'https://images.pexels.com/photos/261185/pexels-photo-261185.jpeg?auto=compress&cs=tinysrgb&w=800',
-    title: 'Swimming Championship',
-    category: 'Swimming',
-    club: 'Aqua Lions Nairobi',
-    tags: ['swimming', 'pool', 'aquatics', 'aqua lions nairobi'],
-  },
-  {
-    url: 'https://images.pexels.com/photos/274422/pexels-photo-274422.jpeg?auto=compress&cs=tinysrgb&w=800',
-    title: 'Football Quarter-Final',
-    category: 'Football',
-    club: 'Savanna FC',
-    tags: ['football', 'soccer', 'team sports', 'savanna fc'],
-  },
-  {
-    url: 'https://images.pexels.com/photos/3621104/pexels-photo-3621104.jpeg?auto=compress&cs=tinysrgb&w=800',
-    title: 'Basketball Tournament',
-    category: 'Basketball',
-    club: 'Rift Valley Ballers',
-    tags: ['basketball', 'team sports', 'rift valley ballers'],
-  },
-  {
-    url: 'https://images.pexels.com/photos/1263426/pexels-photo-1263426.jpeg?auto=compress&cs=tinysrgb&w=800',
-    title: 'Volleyball League Match',
-    category: 'Volleyball',
-    club: 'Coastal Spikers',
-    tags: ['volleyball', 'team sports', 'coastal spikers'],
-  },
-  {
-    url: 'https://images.pexels.com/photos/1040157/pexels-photo-1040157.jpeg?auto=compress&cs=tinysrgb&w=800',
-    title: 'Chess Grand Prix',
-    category: 'Chess',
-    club: 'Nairobi Mind Guild',
-    tags: ['chess', 'mind sports', 'strategy', 'nairobi mind guild'],
-  },
-  {
-    url: 'https://images.pexels.com/photos/3621311/pexels-photo-3621311.jpeg?auto=compress&cs=tinysrgb&w=800',
-    title: 'Opening Ceremony',
-    category: 'Events',
-    club: 'ASMG Organization',
-    tags: ['events', 'ceremony', 'opening', 'asmg organization'],
-  },
-  {
-    url: 'https://images.pexels.com/photos/2306281/pexels-photo-2306281.jpeg?auto=compress&cs=tinysrgb&w=800',
-    title: 'Martial Arts Kata Demo',
-    category: 'Martial Arts',
-    club: 'East Africa Budokan',
-    tags: ['martial arts', 'kata', 'karate', 'east africa budokan'],
-  },
-  {
-    url: 'https://images.pexels.com/photos/2827392/pexels-photo-2827392.jpeg?auto=compress&cs=tinysrgb&w=800',
-    title: 'Long Jump Athletics',
-    category: 'Athletics',
-    club: 'Kenya Track Stars',
-    tags: ['athletics', 'long jump', 'field', 'kenya track stars'],
-  },
-];
-
-const CATEGORIES = [
-  'All',
-  'Skating',
-  'Martial Arts',
-  'Classical Ballet',
-  'Modern Dance',
-  'Athletics',
-  'Swimming',
-  'Football',
-  'Basketball',
-  'Volleyball',
-  'Chess',
-  'Events',
-];
+interface GalleryPhoto {
+  id: string;
+  public_url: string;
+  filename: string;
+}
 
 export default function Gallery() {
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [events, setEvents] = useState<GalleryEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<GalleryEvent | null>(null);
+  const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
+  const [loadingPhotos, setLoadingPhotos] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  const filtered = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
-    return IMAGES.filter(img => {
-      const matchCat = activeCategory === 'All' || img.category === activeCategory;
-      const matchSearch =
-        !q ||
-        img.tags.some(t => t.includes(q)) ||
-        img.title.toLowerCase().includes(q) ||
-        img.category.toLowerCase().includes(q) ||
-        (img.club?.toLowerCase().includes(q) ?? false);
-      return matchCat && matchSearch;
-    });
-  }, [activeCategory, searchQuery]);
+  useEffect(() => {
+    async function fetchEvents() {
+      setLoading(true);
+      const { data } = await supabase
+        .from('gallery_events')
+        .select('id, name, created_at')
+        .order('created_at', { ascending: false });
+
+      if (!data) { setLoading(false); return; }
+
+      const enriched = await Promise.all(
+        data.map(async (ev) => {
+          const { data: firstPhoto } = await supabase
+            .from('gallery_photos')
+            .select('public_url')
+            .eq('gallery_event_id', ev.id)
+            .order('created_at', { ascending: true })
+            .limit(1)
+            .maybeSingle();
+
+          const { count } = await supabase
+            .from('gallery_photos')
+            .select('id', { count: 'exact', head: true })
+            .eq('gallery_event_id', ev.id);
+
+          return {
+            ...ev,
+            cover_url: firstPhoto?.public_url,
+            photo_count: count ?? 0,
+          };
+        })
+      );
+
+      setEvents(enriched.filter(ev => ev.photo_count > 0));
+      setLoading(false);
+    }
+    fetchEvents();
+  }, []);
+
+  async function openEvent(ev: GalleryEvent) {
+    setSelectedEvent(ev);
+    setLoadingPhotos(true);
+    const { data } = await supabase
+      .from('gallery_photos')
+      .select('id, public_url, filename')
+      .eq('gallery_event_id', ev.id)
+      .order('created_at', { ascending: true });
+    setPhotos(data ?? []);
+    setLoadingPhotos(false);
+  }
+
+  function closeLightbox() { setLightboxIndex(null); }
+
+  function prevPhoto() {
+    setLightboxIndex(i => (i !== null ? (i - 1 + photos.length) % photos.length : null));
+  }
+
+  function nextPhoto() {
+    setLightboxIndex(i => (i !== null ? (i + 1) % photos.length : null));
+  }
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (lightboxIndex === null) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') prevPhoto();
+      if (e.key === 'ArrowRight') nextPhoto();
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightboxIndex, photos.length]);
 
   return (
     <section id="gallery" className="py-20 bg-gradient-to-br from-white to-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Gallery</h2>
-          <p className="text-xl text-gray-500">Moments of excellence, unity, and celebration</p>
-        </div>
-
-        <div className="relative mb-6 max-w-lg mx-auto">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search by sport or club name..."
-            className="w-full pl-11 pr-10 py-3 border border-gray-200 rounded-xl text-sm text-gray-700 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition"
+      {lightboxIndex !== null && photos[lightboxIndex] && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={closeLightbox}>
+          <button
+            onClick={closeLightbox}
+            className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <button
+            onClick={e => { e.stopPropagation(); prevPhoto(); }}
+            className="absolute left-4 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <img
+            src={photos[lightboxIndex].public_url}
+            alt={photos[lightboxIndex].filename}
+            className="max-h-[88vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
+            onClick={e => e.stopPropagation()}
           />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
-              aria-label="Clear search"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-
-        <div className="flex flex-wrap gap-2 justify-center mb-10">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
-                activeCategory === cat
-                  ? 'bg-green-600 text-white border-green-600 shadow-md'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-green-400 hover:text-green-700'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {filtered.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">
-            <Search className="w-10 h-10 mx-auto mb-3 opacity-40" />
-            <p className="text-lg font-medium">No photos match your search.</p>
-            <button
-              onClick={() => { setSearchQuery(''); setActiveCategory('All'); }}
-              className="mt-4 text-sm text-green-600 hover:text-green-700 font-semibold underline underline-offset-2"
-            >
-              Clear filters
-            </button>
+          <button
+            onClick={e => { e.stopPropagation(); nextPhoto(); }}
+            className="absolute right-4 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white/60 text-sm">
+            {lightboxIndex + 1} / {photos.length}
           </div>
-        ) : (
+        </div>
+      )}
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {!selectedEvent ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((image, index) => (
-                <div
-                  key={index}
-                  className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-2xl transition-all cursor-pointer aspect-square"
-                >
-                  <img
-                    src={image.url}
-                    alt={image.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <span className="inline-block bg-green-500 text-white text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-2">
-                        {image.category}
-                      </span>
-                      <h3 className="text-white text-lg font-bold leading-tight">{image.title}</h3>
-                      {image.club && (
-                        <p className="text-gray-300 text-xs mt-1">{image.club}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="text-center mb-12">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Gallery</h2>
+              <p className="text-xl text-gray-500">Moments of excellence, unity, and celebration</p>
             </div>
 
-            <p className="mt-6 text-center text-sm text-gray-400">
-              Showing {filtered.length} of {IMAGES.length} photos
-            </p>
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="aspect-[4/3] rounded-2xl bg-gray-100 animate-pulse" />
+                ))}
+              </div>
+            ) : events.length === 0 ? (
+              <div className="text-center py-20">
+                <Images className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                <p className="text-gray-400 text-lg font-medium">No gallery events yet.</p>
+                <p className="text-gray-400 text-sm mt-1">Check back after the event!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {events.map(ev => (
+                  <button
+                    key={ev.id}
+                    onClick={() => openEvent(ev)}
+                    className="group relative text-left overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                  >
+                    <div className="aspect-[4/3] bg-gray-200">
+                      {ev.cover_url ? (
+                        <img
+                          src={ev.cover_url}
+                          alt={ev.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                          <Images className="w-10 h-10 text-gray-300" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <h3 className="text-white text-lg font-bold leading-tight mb-1">{ev.name}</h3>
+                      <div className="flex items-center gap-1.5">
+                        <span className="inline-flex items-center gap-1 bg-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
+                          <Images className="w-3 h-3" />
+                          {ev.photo_count} photo{ev.photo_count !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="absolute inset-0 ring-2 ring-inset ring-white/0 group-hover:ring-white/20 rounded-2xl transition-all" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="flex items-center gap-4 mb-10">
+              <button
+                onClick={() => { setSelectedEvent(null); setPhotos([]); }}
+                className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-green-600 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                All Galleries
+              </button>
+              <span className="text-gray-300">/</span>
+              <h2 className="text-2xl font-bold text-gray-900">{selectedEvent.name}</h2>
+            </div>
+
+            {loadingPhotos ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="aspect-square rounded-xl bg-gray-100 animate-pulse" />
+                ))}
+              </div>
+            ) : photos.length === 0 ? (
+              <div className="text-center py-20">
+                <Images className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                <p className="text-gray-400">No photos in this gallery yet.</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {photos.map((photo, idx) => (
+                    <button
+                      key={photo.id}
+                      onClick={() => setLightboxIndex(idx)}
+                      className="group relative aspect-square overflow-hidden rounded-xl shadow-sm hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                    >
+                      <img
+                        src={photo.public_url}
+                        alt={photo.filename}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-all rounded-xl" />
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-6 text-center text-sm text-gray-400">
+                  {photos.length} photo{photos.length !== 1 ? 's' : ''} in this gallery
+                </p>
+              </>
+            )}
           </>
         )}
-
       </div>
     </section>
   );
